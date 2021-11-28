@@ -36,6 +36,7 @@ const requestLogger = (request, response, next) => {
   logger.info("Path:  ", request.path);
   logger.info("Body:  ", request.body);
   logger.info("---");
+  logger.info("reply:  ", response.body);
   next();
 };
 
