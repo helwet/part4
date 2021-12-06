@@ -31,7 +31,7 @@ usersRouter.post("/", async (request, response) => {
     const savedUser = await user.save();
     response.json(savedUser);
   } catch {
-    response.json = { error: "bad format of post" };
+    response.json({ error: "bad format of post" });
   }
 });
 
