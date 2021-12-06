@@ -18,11 +18,9 @@ const getTokenFrom = (request) => {
 
 blogsRouter.post("/", async (request, response) => {
   const body = request.body;
-  const decodedToken = request.decodedToken;
-  if (!decodedToken && !decodedToken.id) {
+  if (!request.token && !request.token.id) {
     return response.status(401).json({ error: "token missing or invalid" });
   }
-  //const user = await User.findById(decodedToken.id);
   if (request.user) {
     const user = request.user;
     const blog = new Blog({
@@ -32,13 +30,17 @@ blogsRouter.post("/", async (request, response) => {
       likes: 0,
       user: request.user.id
     });
-
+    if (!blog.title || !blog.url) {
+      return response.status(401).json({ error: "must have title and url" });
+    }
     const savedBlog = await blog.save();
+    console.log(JSON.stringify(savedBlog.body));
     user.blogs = user.blogs.concat(savedBlog._id);
     await user.save();
 
     response.json(savedBlog.toJSON());
   }
+  return response.status(401).json({ error: "bad token" });
 });
 blogsRouter.get("/:id", async (request, response) => {
   const blog = await Blog.findById(request.params.id);

@@ -13,10 +13,11 @@ usersRouter.post("/", async (request, response) => {
   try {
     const body = request.body;
     console.log("pass lenght :");
-    console.log(body);
-    if (body.password.length < 3 || body.username.length < 3) {
+    console.log(JSON.stringify(body));
+    if (body.password.length < 8 || body.username.length < 3) {
       return response.status(400).json({
-        error: "password and name should be at least 3 characters"
+        error:
+          "password should be atleast 8 and name should be at least 3 characters"
       });
     }
     const saltRounds = 10;
