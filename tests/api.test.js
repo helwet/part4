@@ -9,7 +9,6 @@ beforeEach(() => {
   //npmjest.setTimeout(8000);
 });
 
-/*
 //4.8
 test("blogs are returned as json", async () => {
   const rep = await api
@@ -21,12 +20,12 @@ test("blogs are returned as json", async () => {
 //4.9
 test("blog has id in json format", async () => {
   const reply = await api.get("/api/blogs");
-  expect(reply[0].id).toBeDefined();
+  expect(reply.body[0].id).toBeDefined();
 });
-*/
+
 //4.10,  4.11 ja 4.12..
 test("testaa kaikki muu kerralla, koska post tarvitsee tokenin, ja lisätty blogi täytyy poistaa, että testi menee läpi seuraavan kerran koska unique constraint", async () => {
-  jest.setTimeout(10000);
+  jest.setTimeout(20000);
   const initial = await api.get("/api/blogs");
 
   const initialCount = initial.body.length;
@@ -34,34 +33,37 @@ test("testaa kaikki muu kerralla, koska post tarvitsee tokenin, ja lisätty blog
   const user = await api
     .post("/api/login")
     .send({
-      username: "test1",
-      password: "test111"
+      username: "testrunner",
+      password: "testrunner"
     })
     .set("Content-type", "application/json");
 
-  console.log("user: " + JSON.stringify(user.body));
+  //console.log("user: " + JSON.stringify(user.body));
   expect(user.body.token).toBeDefined();
   const payload = {
     title: "testiii",
     author: "erkki",
     url: "mitaa merkitysta"
   };
-
   const blog = await api
     .post("/api/blogs")
-    .send({ payload })
-    .set("Authorization", `bearer ${user.body.token}`);
+    .send(payload)
+    .set("Authorization", `bearer ${user.body.token}`)
+    .set("Content-type", "application/json");
 
-  console.log(blog.body);
+  console.log(
+    "blog body :" + JSON.stringify(blog.body) + "  stat :" + blog.status
+  );
   expect(blog.body.likes).toBe(0);
 
-  const afterPostCount = await api.get("/api/blogs").body.length;
+  const after = await api.get("/api/blogs");
+  const afterPostCount = after.body.length;
   console.log("after post count : " + afterPostCount);
 
   expect(initialCount < afterPostCount);
   const deleteReply = await api
     .delete(`/api/blogs/${blog.body.id}`)
-    .set("Authorization", `Bearer ${user.body.token}`);
+    .set("Authorization", `bearer ${user.body.token}`);
   expect(deleteReply.status).toBe(200);
 
   const badPayload = {
@@ -71,21 +73,11 @@ test("testaa kaikki muu kerralla, koska post tarvitsee tokenin, ja lisätty blog
 
   const badReply = await api
     .post("/api/blogs")
-    .send({ badPayload })
-    .set("Authorization", `Bearer ${user.token}`);
-  expect(badReply.status).toBe(200);
+    .send(badPayload)
+    .set("Authorization", `bearer ${user.body.token}`);
+  expect(badReply.status).toBe(401);
 });
-/*
-//4.11
-//täysin turha toteuktuksessa ei edes käytetä likes paramateria
-test("blog likes defaults to 0", async () => {
-  const initialCount = await api.get("/api/blogs").lenght;
-  const post = await api.post("/api/blogs");
-  const reply = await api.get("/api/blogs");
-  expect(reply[0].id).toBeDefined();
-  expect
-});
-*/
+
 afterAll(() => {
   mongoose.connection.close();
 });

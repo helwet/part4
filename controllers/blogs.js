@@ -30,11 +30,12 @@ blogsRouter.post("/", async (request, response) => {
       likes: 0,
       user: request.user.id
     });
+    // console.log(JSON.stringify(body));
     if (!blog.title || !blog.url) {
       return response.status(401).json({ error: "must have title and url" });
     }
     const savedBlog = await blog.save();
-    console.log(JSON.stringify(savedBlog.body));
+    //console.log(JSON.stringify(savedBlog.body));
     user.blogs = user.blogs.concat(savedBlog._id);
     await user.save();
 
@@ -52,28 +53,37 @@ blogsRouter.get("/:id", async (request, response) => {
 });
 
 blogsRouter.delete("/:id", async (request, response) => {
-  const b = await Blog.findByIdAndRemove(request.params.id);
-  if (request.user && request.user._id === b.user) {
+  console.log("param:  " + request.params.id);
+  const b = await Blog.findById(request.params.id);
+  if (!b) {
+    response.status(404).json({ error: "no such blog" });
+  }
+  //console.log("compare: " + (String(request.user._id) === String(b.user)));
+  //console.log(request.user._id);
+  //console.log(b.user);
+  if (request.user && String(request.user._id) === String(b.user)) {
     await Blog.findByIdAndRemove(request.params.id);
-    response.status(204).end();
+
+    request.user.blogs = request.user.blogs.filter(function (ele) {
+      return String(ele.user) === String(request.params.id);
+    });
+    //await request.user.blogs.findByIdAndRemove(request.params.id);
+    await request.user.save();
+    response.status(200).end();
   } else {
-    response.status(500).end();
+    response.status(401).json({ error: "unauthorized" });
   }
 });
 
 blogsRouter.put("/:id", async (request, response, next) => {
+  console.log("param:  " + request.params.id);
   if (request.user) {
-    const b = await Blog.findByIdAndRemove(request.params.id);
+    const b = await Blog.findById(request.params.id);
     b.likes = b.likes + 1;
     await b.save();
   }
+  response.status(401).json({ error: "unauthorized" });
   return;
-
-  Blog.findByIdAndUpdate(request.params.id, blog, { new: true })
-    .then((updatedBlog) => {
-      response.json(updatedBlog.toJSON());
-    })
-    .catch((error) => next(error));
 });
 
 module.exports = blogsRouter;
