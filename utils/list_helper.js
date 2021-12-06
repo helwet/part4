@@ -2,7 +2,30 @@ const _ = require("lodash");
 const dummy = (blogs) => {
   return 1;
 };
+const totalLikes = (blogs) => {
+  let sum = _.sumBy(blogs, "likes");
+  return sum;
+};
 
+const mostLikes = (blogs) => {
+  const authors = combineOnKey(blogs, "author");
+  let ret = { author: "shit", likes: 0 };
+
+  //console.log("authors: " + JSON.stringify(authors));
+  for (let i = 0; i < authors.length; i++) {
+    const auth = Object.values(authors[i].values);
+    const sum = _.sumBy(auth, "likes");
+    console.log("sum: " + sum);
+    if (sum > ret.likes) {
+      ret.likes = sum;
+      ret.author = auth[0].author;
+    }
+  }
+  console.log("total likes ret: " + ret);
+
+  return ret;
+};
+/*
 const totalLikes = (blogs) => {
   const authors = combineOnKey(blogs, "author");
   let ret = { likes: 0, author: "no one" };
@@ -21,7 +44,7 @@ const totalLikes = (blogs) => {
 
   return ret;
 };
-
+*/
 //kerätään kaikki tietyn arvon matchaamat listoiksi
 const combineOnKey = (data, key) => {
   const output = [];
@@ -68,41 +91,6 @@ const mostBlogs = (blogs) => {
   // console.log("wtf " + ret);
 
   return ret;
-  /*
-  let authors = {};
-  blogs.forEach((blogPost) => {
-    if (authors[blogPost.author]) {
-      authors[blogPost.author] += 1;
-    } else {
-      authors[blogPost.author] = 1;
-    }
-  });
-  let maxBlog = Math.max(...Object.values(authors));
-  let maxAuthor = Object.keys(authors).find(
-    (author) => authors[author] === maxBlog
-  );
-
-  let collection = new Map();
-
-
-  let blog;
-  for (let i = 0; i < blogs.length; i++) {
-    blog = blogs[i];
-    if (!collection.has(blog.author)) {
-      collection.set(blog.author, Number(1));
-    } else {
-      collection[blog.author] = Number(collection[blog.author]) + 1;
-    }
-    if (Number(collection[blogs[i].author]) > max) {
-      max = blog.likes;
-      maxAuthor = blog.author;
-    }
-  }
-  console.log(collection);
-
-  return { author: maxAuthor, blogs: maxBlog };
-    
-  */
 };
 
 //just amount of likes on most liked blog
@@ -144,10 +132,6 @@ const mostLikes = (blogs) => {
 };
 */
 //tän tehtävänanto on päinvittua
-const mostLikes = (blogs) => {
-  let sum = _.sumBy(blogs, "likes");
-  return sum;
-};
 
 module.exports = {
   mostLikes,

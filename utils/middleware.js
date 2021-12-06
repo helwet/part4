@@ -18,13 +18,15 @@ const tokenExtractor = (request, response, next) => {
 };
 
 const userExtractor = async (request, response, next) => {
-  if (request.token) {
-    console.log("extracting user");
-    request.user = await User.findById(request.token.id);
+  if (request.method !== "GET") {
+    if (request.token) {
+      console.log("extracting user");
+      request.user = await User.findById(request.token.id);
 
-    console.log("user = " + request.user);
-  } else {
-    return response.status(401).json({ error: "token missing or invalid" });
+      console.log("user = " + request.user);
+    } else {
+      return response.status(401).json({ error: "token missing or invalid" });
+    }
   }
   next();
 };
