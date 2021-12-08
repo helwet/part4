@@ -14,7 +14,8 @@ const logger = require("./utils/logger");
 const helper = require("./utils/list_helper");
 
 const requestLogger = (request, response, next) => {
-  if (request.methed !== "GET") console.log("---" + response.body);
+  if (request.methed !== "GET") console.log("---req: " + response.body);
+
   // console.log("res:", response.body);
   next();
 };
