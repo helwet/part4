@@ -14,10 +14,8 @@ const logger = require("./utils/logger");
 const helper = require("./utils/list_helper");
 
 const requestLogger = (request, response, next) => {
-  console.log("Method:", request.method);
-  console.log("Path:  ", request.path);
-  console.log("Body:  ", request.body);
-  console.log("---");
+  if (request.methed !== "GET") console.log("---req: " + response.body);
+
   // console.log("res:", response.body);
   next();
 };
@@ -40,7 +38,7 @@ app.use(cors());
 app.use(express.static("build"));
 app.use(express.json());
 
-//app.use(middleware.requestLogger);
+app.use(requestLogger);
 app.use(middleware.tokenExtractor);
 
 app.use("/api/blogs", middleware.userExtractor, blogRouter);
@@ -49,6 +47,6 @@ app.use("/api/login", loginRouter);
 
 // You can set morgan to log differently depending on your environment
 app.use(middleware.unknownEndpoint);
-//app.use(middleware.errorHandler);
+app.use(middleware.errorHandler);
 
 module.exports = app;
